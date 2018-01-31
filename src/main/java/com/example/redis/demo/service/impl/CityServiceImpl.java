@@ -31,6 +31,7 @@ public class CityServiceImpl implements CityService {
         }
 
         City city = cityDao.findById(id);
+        logger.info("从数据库中获取数据");
         //加入缓存
         redisTemplate.opsForValue().set(key,city);
         return city;
@@ -46,8 +47,20 @@ public class CityServiceImpl implements CityService {
         return null;
     }
 
+    /**
+     * 缓存更新  
+     * @param city
+     * @return
+     */
     @Override
     public Long updateCity(City city) {
-        return null;
+        String key = "city_"+city.getId();
+        Long sum = cityDao.updateCity(city);
+        boolean hasKey = redisTemplate.hasKey(key);
+        if(hasKey){
+            redisTemplate.delete(key);  //删除缓存
+            logger.info("删除缓存成功");
+        }
+        return sum;
     }
 }
