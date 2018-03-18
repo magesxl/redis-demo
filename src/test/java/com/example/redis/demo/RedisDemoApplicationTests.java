@@ -30,7 +30,7 @@ public class RedisDemoApplicationTests {
 
 	@Test
 	public void saveString(){
-		redisTemplate.opsForValue().set("aaa", "111");
+		redisTemplate.opsForValue().set("aab", "111");
 		Assert.assertEquals("111",redisTemplate.opsForValue().get("aaa"));
 		System.out.println(redisTemplate.opsForValue().get("aaa"));
 	}
@@ -40,4 +40,8 @@ public class RedisDemoApplicationTests {
 		System.out.println(cityDao.findAllCity());
 	}
 
+	@Test
+	public void findAlltest1(){
+
+	}
 }
