@@ -1,12 +1,13 @@
 package com.example.redis.demo.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.example.redis.demo.dao.CityDao;
 import com.example.redis.demo.domain.City;
 import com.example.redis.demo.service.CityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,22 +19,23 @@ public class CityServiceImpl implements CityService {
     private CityDao cityDao;
 
     @Autowired
-    private RedisTemplate redisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
 
     @Override
     public City findCityById(Long id) {
         //缓存key
         String key = "city_" + id;
-        boolean hasKey = redisTemplate.hasKey(key);
+        boolean hasKey = stringRedisTemplate.hasKey(key);
         if (hasKey) {
             logger.info("从缓存中获取数据");
-            return (City) redisTemplate.opsForValue().get(key);
+            return JSON.parseObject(stringRedisTemplate.opsForValue().get(key), City.class);
         }
 
         City city = cityDao.findById(id);
         logger.info("从数据库中获取数据");
         //加入缓存
-        redisTemplate.opsForValue().set(key,city);
+        stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(city));
+        stringRedisTemplate.opsForValue().setBit(key, 1, true);
         return city;
     }
 
@@ -48,17 +50,18 @@ public class CityServiceImpl implements CityService {
     }
 
     /**
-     * 缓存更新  
+     * 缓存更新
+     *
      * @param city
      * @return
      */
     @Override
     public Long updateCity(City city) {
-        String key = "city_"+city.getId();
+        String key = "city_" + city.getId();
         Long sum = cityDao.updateCity(city);
-        boolean hasKey = redisTemplate.hasKey(key);
-        if(hasKey){
-            redisTemplate.delete(key);  //删除缓存
+        boolean hasKey = stringRedisTemplate.hasKey(key);
+        if (hasKey) {
+            stringRedisTemplate.delete(key);  //删除缓存
             logger.info("删除缓存成功");
         }
         return sum;
