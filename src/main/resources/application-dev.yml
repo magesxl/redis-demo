@@ -1,0 +1,25 @@
+logging:
+    config: classpath:logback-dev.xml
+mybatis:
+    mapperLocations: classpath:mapper/*.xml
+    typeAliasesPackage: com.example.redis.demo.domain
+server:
+    port: 8070
+spring:
+    datasource:
+        driver-class-name: com.mysql.jdbc.Driver
+        password: mysql
+        url: jdbc:mysql://localhost:3306/mag?useUnicode=true&characterEncoding=utf8
+        username: root
+    redis:
+        database: 0
+        host: localhost
+        lettuce:
+            pool:
+                max-active: 8
+                max-idle: 8
+                max-wait: -1
+                min-idle: 0
+        password: ''
+        port: 6379
+        timeout: 6000

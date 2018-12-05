@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
+
 @RestController
 public class CityController {
 
@@ -24,5 +27,11 @@ public class CityController {
     public String updateById(@RequestBody City city) {
         cityService.updateCity(city);
         return "success";
+    }
+
+    @RequestMapping(value = "/city/{id}", method = RequestMethod.DELETE)
+    public void deId(HttpServletRequest request,@PathVariable Long id) {
+        Map<?, ?> parameters = request.getParameterMap();
+        cityService.deleteCity(id);
     }
 }

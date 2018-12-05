@@ -38,6 +38,8 @@ dependencies {
     compile('com.alibaba:fastjson:1.1.26')
     compile('org.apache.commons:commons-pool2')
 //
+    compile ('org.redisson:redisson:3.9.1')
+    compile('com.google.guava:guava:27.0-jre')
     runtime group: 'mysql', name: 'mysql-connector-java', version: '5.1.44'
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }

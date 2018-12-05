@@ -1,14 +1,21 @@
 package com.example.redis.demo.service.impl;
 
-import com.alibaba.fastjson.JSON;
+import com.example.redis.demo.config.RedisDistributedLock;
 import com.example.redis.demo.dao.CityDao;
 import com.example.redis.demo.domain.City;
 import com.example.redis.demo.service.CityService;
+import org.redisson.Redisson;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class CityServiceImpl implements CityService {
@@ -19,24 +26,39 @@ public class CityServiceImpl implements CityService {
     private CityDao cityDao;
 
     @Autowired
+    private RedisDistributedLock redisDistributedLock;
+
+    @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
     @Override
     public City findCityById(Long id) {
         //缓存key
-        String key = "city_" + id;
-        boolean hasKey = stringRedisTemplate.hasKey(key);
-        if (hasKey) {
-            logger.info("从缓存中获取数据");
-            return JSON.parseObject(stringRedisTemplate.opsForValue().get(key), City.class);
-        }
+        String lockKey = "12346789";
+        String lockValue = "1234678910_" + id + "_" + Thread.currentThread().getId();
+        boolean lock = redisDistributedLock.tryGetDistributedLock(lockKey, lockValue, 10);
+        logger.info("当前获取锁lock为：" + lock + "value为：" + lockValue);
+//        try {
+//            TimeUnit.SECONDS.sleep(6);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+        logger.info("当前获取锁线程为：" + Thread.currentThread().getId());
+        boolean unLock = redisDistributedLock.releaseDistributedLock(lockKey, lockValue);
+        logger.info("当前释放锁锁unLock为：" + unLock + "value为：" + lockValue);
 
-        City city = cityDao.findById(id);
-        logger.info("从数据库中获取数据");
-        //加入缓存
-        stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(city));
-        stringRedisTemplate.opsForValue().setBit(key, 1, true);
-        return city;
+//        String key = "city_" + id;
+//        boolean hasKey = stringRedisTemplate.hasKey(key);
+//        if (hasKey) {
+//            logger.info("从缓存中获取数据");
+//            return JSON.parseObject(stringRedisTemplate.opsForValue().get(key), City.class);
+//        }
+//        City city = cityDao.findById(id);
+//        logger.info("从数据库中获取数据");
+//        //加入缓存
+//        stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(city));
+//        stringRedisTemplate.opsForValue().setBit(key, 1, true);
+        return null;
     }
 
     @Override
@@ -46,7 +68,23 @@ public class CityServiceImpl implements CityService {
 
     @Override
     public Long deleteCity(Long id) {
-        return null;
+        String lockKey = "12346789";
+        String lockValue = "1234678910_" + id + "_" + Thread.currentThread().getId();
+        Config config = new Config();
+        config.useSingleServer().setAddress("redis://localhost:6379");
+        RedissonClient redissonClient = Redisson.create(config);
+        RLock lock = redissonClient.getLock(lockValue);
+        logger.info("从数据库中获取数据" + lock.getName());
+        lock.lock(10, TimeUnit.SECONDS);
+        logger.info("锁住了" + lock.getName() + ":" + lock.isHeldByCurrentThread());
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        lock.unlock();
+//        redissonClient.shutdown();
+        return 1L;
     }
 
     /**
