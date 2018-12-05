@@ -1,14 +1,13 @@
 package com.example.redis.demo.controller;
 
 import com.example.redis.demo.domain.City;
+import com.example.redis.demo.errors.Result;
+import com.example.redis.demo.errors.ResultGenerator;
 import com.example.redis.demo.service.CityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
 
 @RestController
 public class CityController {
@@ -19,8 +18,8 @@ public class CityController {
     private CityService cityService;
 
     @RequestMapping(value = "/city/{id}", method = RequestMethod.GET)
-    public City getId(@PathVariable Long id) {
-        return cityService.findCityById(id);
+    public Result getId(@PathVariable Long id) {
+        return ResultGenerator.genSuccessResult(cityService.findCityById(id));
     }
 
     @RequestMapping(value = "/city/update", method = RequestMethod.POST)
@@ -29,9 +28,9 @@ public class CityController {
         return "success";
     }
 
-    @RequestMapping(value = "/city/{id}", method = RequestMethod.DELETE)
-    public void deId(HttpServletRequest request,@PathVariable Long id) {
-        Map<?, ?> parameters = request.getParameterMap();
-        cityService.deleteCity(id);
+    @RequestMapping(value = "/city/", method = RequestMethod.POST)
+    public Result redisLimit() {
+        cityService.redisLimit();
+        return ResultGenerator.genSuccessResult();
     }
 }

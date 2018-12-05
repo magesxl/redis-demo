@@ -3,6 +3,7 @@ package com.example.redis.demo.service.impl;
 import com.example.redis.demo.config.RedisDistributedLock;
 import com.example.redis.demo.dao.CityDao;
 import com.example.redis.demo.domain.City;
+import com.example.redis.demo.errors.CommonDefinedException;
 import com.example.redis.demo.service.CityService;
 import org.redisson.Redisson;
 import org.redisson.api.RLock;
@@ -85,6 +86,23 @@ public class CityServiceImpl implements CityService {
         lock.unlock();
 //        redissonClient.shutdown();
         return 1L;
+    }
+
+    @Override
+    public void redisLimit() {
+        //限流按商户分 控制幅度为每秒一次  获取当前描述为key 每秒调用1次
+        String limitKey = "limited_key" + "_" + System.currentTimeMillis() / 1000;
+        String count = "1";
+        long limit = 0;
+        logger.info("当前key为：" + limitKey);
+        try {
+            limit = redisDistributedLock.permit(limitKey, count, "4");
+        } catch (IOException e) {
+            logger.error("文件异常");
+        }
+        if (limit == 0) {
+            throw CommonDefinedException.MENU_ROOT_EXITS_ERROR;
+        }
     }
 
     /**

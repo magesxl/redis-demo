@@ -2,6 +2,8 @@ package com.example.redis.demo.service;
 
 import com.example.redis.demo.domain.City;
 
+import java.io.IOException;
+
 public interface CityService {
     /**
      * 根据城市 ID,查询城市信息
@@ -34,4 +36,6 @@ public interface CityService {
      * @return
      */
     Long deleteCity(Long id);
+
+    void redisLimit();
 }
