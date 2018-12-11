@@ -34,6 +34,7 @@ public class CityServiceImpl implements CityService {
 
     @Override
     public City findCityById(Long id) {
+        City city = new City();
         //缓存key
         String lockKey = "12346789";
         String lockValue = "1234678910_" + id + "_" + Thread.currentThread().getId();
@@ -47,7 +48,7 @@ public class CityServiceImpl implements CityService {
         logger.info("当前获取锁线程为：" + Thread.currentThread().getId());
         boolean unLock = redisDistributedLock.releaseDistributedLock(lockKey, lockValue);
         logger.info("当前释放锁锁unLock为：" + unLock + "value为：" + lockValue);
-
+        stringRedisTemplate.convertAndSend("124", "你好");
 //        String key = "city_" + id;
 //        boolean hasKey = stringRedisTemplate.hasKey(key);
 //        if (hasKey) {
@@ -59,7 +60,7 @@ public class CityServiceImpl implements CityService {
 //        //加入缓存
 //        stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(city));
 //        stringRedisTemplate.opsForValue().setBit(key, 1, true);
-        return null;
+        return city;
     }
 
     @Override

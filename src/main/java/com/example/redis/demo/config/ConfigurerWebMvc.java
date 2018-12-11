@@ -14,7 +14,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -26,7 +26,7 @@ import java.util.List;
  */
 @Configuration
 @EnableWebMvc
-public class ConfigurerWebMvc extends WebMvcConfigurerAdapter {
+public class ConfigurerWebMvc implements WebMvcConfigurer {
 
     private final Logger logger = LoggerFactory.getLogger(ConfigurerWebMvc.class);
 
