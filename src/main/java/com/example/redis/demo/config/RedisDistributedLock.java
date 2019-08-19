@@ -90,7 +90,8 @@ public class RedisDistributedLock {
     public long permit(String lockKey, String count, String time) throws IOException {
         byte[] lua = Files.readAllBytes(ResourceUtils.getFile("classpath:limit_1.lua").toPath());
         String luaScript = new String(lua);
-        Long res = stringRedisTemplate.execute(new DefaultRedisScript<>(luaScript, Long.class), Collections.singletonList(lockKey), count, time);
+        Long res = stringRedisTemplate.execute(new DefaultRedisScript<>(luaScript, Long.class), 
+                            Collections.singletonList(lockKey), count, time);
         return res.longValue();
     }
 
